@@ -16,15 +16,18 @@ class EventoController extends Controller
         return view('eventos.index', compact('eventos'));
     }
 
-    public function show($id)
+    // Garanta que o parâmetro do método é (Evento $evento) com o tipo correto
+    public function show(Evento $evento)
     {
-        $evento = Evento::find($id);
+        // Ticket #006: Filtra as perguntas públicas e mantém paginação + eager loading
+        $perguntas = $evento->perguntas()
+            ->where('is_public', true)
+            ->with('user')
+            ->paginate(10);
 
-        $perguntas = Pergunta::all();
-
+        // Passa o objeto $evento populado e a paginação de $perguntas para a view
         return view('eventos.show', compact('evento', 'perguntas'));
     }
-
  
     public function storePergunta(StorePerguntaRequest $request, $id)
     {
